@@ -1,0 +1,30 @@
+name: Daily Update
+
+on:
+  schedule:
+    - cron: '0 23 * * *'  # 매일 한국 시간 아침 8시 실행
+  workflow_dispatch:      # 수동 실행 버튼 추가
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.9'
+      - name: Install libraries
+        run: pip install pandas pandas_datareader matplotlib
+      - name: Run script
+        run: python update_dashboard.py
+      - name: Commit and push
+        run: |
+          git config --global user.name 'GitHub Action'
+          git config --global user.email 'action@github.com'
+          git add index.html
+          git commit -m "Auto-update data" || exit 0
+          git push
